@@ -112,21 +112,33 @@ app.post("/recognize", async (req, res) => {
     if (!embedding) {
       return res.status(400).json({ message: "No face detected in the image" });
     }
+    console.log("Extracted embedding length:", embedding.length); // Log embedding length
 
     const employees = await Employee.find({});
     let recognized = false;
 
     for (let emp of employees) {
-      if (embedding.length !== emp.embedding.length) continue;
+      console.log("Stored embedding length:", emp.embedding.length); // Log stored embedding length
+
+      if (embedding.length !== emp.embedding.length) {
+        console.error(
+          "Embedding length mismatch:",
+          embedding.length,
+          emp.embedding.length
+        );
+        continue; // Skip this employee
+      }
 
       const distance = faceapi.euclideanDistance(embedding, emp.embedding);
       if (distance < 0.6) {
+        // Adjust threshold as needed
         recognized = true;
         return res.json({ message: `Recognized: ${emp.name}` });
       }
     }
 
     if (!recognized) {
+      // If a face is detected but no match is found in the database
       return res.status(404).json({ message: "No user found" });
     }
   } catch (error) {
