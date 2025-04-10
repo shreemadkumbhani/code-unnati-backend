@@ -13,6 +13,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 
+app.get("/", (req, res) => {
+  res.send("Face Recognition API is running ✅");
+});
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
